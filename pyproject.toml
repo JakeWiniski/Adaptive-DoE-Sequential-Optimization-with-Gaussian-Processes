@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adaptive-doe"
+version = "0.2.0"
+description = "Adaptive design of experiments for a small biology R&D team"
+readme = "README.md"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "botorch==0.17.2",
+    "gpytorch==1.15.2",
+    "matplotlib==3.10.8",
+    "numpy==1.26.4",
+    "pandas==2.3.3",
+    "pydantic==2.12.5",
+    "scipy==1.17.1",
+    "torch==2.2.2",
+]
+
+[project.optional-dependencies]
+notebooks = [
+    "ipykernel==7.2.0",
+    "nbclient==0.10.4",
+    "nbformat==5.10.4",
+]
+dev = [
+    "hypothesis==6.161.5",
+    "nbclient==0.10.4",
+    "nbformat==5.10.4",
+    "pytest==9.0.2",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra -m 'not slow'"
+testpaths = ["tests"]
+markers = [
+    "slow: end-to-end checks that drive the full loop; run with `pytest -m slow` or `python check.py`",
+]
