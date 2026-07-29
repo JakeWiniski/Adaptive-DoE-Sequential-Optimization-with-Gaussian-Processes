@@ -15,6 +15,7 @@ experiment in real units and fill in a spreadsheet of results, you can run it.
 
 - **[What it is and why](#what-it-is-and-why)**
 - **[How it works (the method)](#how-it-works-the-method)**
+- **[The acquisition function (how recipes are chosen)](#the-acquisition-function-how-recipes-are-chosen)**
 - **[Install](#install)**
 - **[Quickstart](#quickstart)**
 - **[Walking through a campaign](#walking-through-a-campaign)**
@@ -123,6 +124,89 @@ Under the hood, a few deliberate choices do the work:
 A `propose` call is not instantaneous: it fits the GP and runs a multi‑restart acquisition
 optimization over the mixed continuous/categorical space. Expect seconds to a couple of minutes
 depending on campaign size and the `num_restarts` / `raw_samples` settings.
+
+---
+
+## The acquisition function (how recipes are chosen)
+
+Perhaps surprisingly, the workflow makes **no explicit explore‑vs‑exploit decision**. There is no
+"exploration run" and "exploitation run", and no preset that allocates some slots to one and some to
+the other. Every model‑chosen recipe in a round comes from the *same* acquisition function, which
+balances exploration and exploitation **continuously and automatically** through the model's own
+uncertainty.
+
+### One function does both: noisy log expected improvement
+For each model‑chosen point, the workflow builds a single acquisition —
+`qLogNoisyExpectedImprovement` (qLogNEI) — and proposes the recipe that maximizes it. Expected
+Improvement (EI) is where the tradeoff lives.
+
+At any candidate recipe **x**, the fitted Gaussian process returns a predictive distribution: a
+**mean** μ(x) (its best guess of the response there) and an **uncertainty** σ(x) (how unsure it is).
+EI is the *expected amount by which the response at x would beat the best you have seen so far*,
+integrated over that distribution. A candidate scores high on EI if **either**:
+
+- **μ(x) is high** — it sits in a region the model already believes is good. This is **exploitation**.
+- **σ(x) is large** — even with a middling mean, the wide uncertainty means there is a real chance it
+  turns out much better than expected. This is **exploration**.
+
+Points that are **both** promising and uncertain score highest. So a single candidate can be
+exploitative, exploratory, or a blend, and EI simply picks whatever maximizes expected improvement —
+the balance is baked into the formula, not chosen by a flag or a fraction. Early in a campaign, when
+the model is uncertain almost everywhere, EI naturally spreads out (explores); as evidence
+accumulates and uncertainty shrinks, it naturally tightens toward the current best (exploits). That
+transition is automatic and gradual, not a switch that flips.
+
+### Keeping a batch diverse
+A round proposes several model‑chosen recipes, selected **one at a time**. Each recipe already chosen
+this round is fed back to the acquisition as a *pending* point before the next is selected:
+
+```python
+# each recipe already picked this round is passed as X_pending before choosing the next
+acquisition = qLogNoisyExpectedImprovement(
+    model=model,
+    X_baseline=observed_conditions,        # everything recorded so far
+    X_pending=already_selected_this_round, # the batch-diversity mechanism
+    sampler=SobolQMCNormalSampler(...),    # Monte-Carlo samples for the noisy posterior
+)
+```
+
+qLogNEI treats those pending points as if they will be observed, which **lowers the acquisition value
+near them**. The next selection is therefore pushed toward a different useful region. That is why a
+batch comes out varied — some points near the incumbent, some in under‑sampled areas — without any
+explicit "make this one an exploration point" rule. The diversity is an *emergent* property of
+sequential (greedy) EI with pending points, not an allocation.
+
+### The "Noisy" and "Log" parts
+- **Noisy (NEI).** Because replicates are noisy, it does not anchor "improvement" to the single best
+  *observed* value (which could be a lucky high reading). It integrates over the model's posterior
+  about what the true best‑so‑far actually is, using Monte‑Carlo samples. This keeps it from
+  over‑exploiting noise.
+- **Log (qLogEI).** A numerically stable, log‑space reformulation of EI. Plain EI has vanishing
+  gradients far from the incumbent, which starves the optimizer; the log form fixes that so the
+  optimizer reliably finds strong candidates.
+
+### The rest of the selection pipeline
+For each point, the acquisition is maximized over the **mixed** space: the categorical combinations
+(strain × substrate × …) are enumerated, and the continuous factors are optimized within each,
+subject to your bounds and any `<=` / `>=` constraints, with the block held at the current round. The
+winner is then **rounded to your `step` grid**, with a small collision guard so two proposals cannot
+land on the same achievable setpoint. Finally the **control** is appended — the one condition *not*
+chosen by the acquisition; it is a fixed reference included in every round.
+
+### A note on the "explore" label in the ledger
+Every model‑chosen row is written with `slot_type = "explore"` (and a rationale beginning
+"Best‑guess — predicted typical …"), while the control is `slot_type = "control"`. Do not read a mode
+into the word "explore": it only distinguishes model‑chosen recipes from the control. **There is no
+`"exploit"` slot type**, and these rows are not "exploration‑mode" runs — they are all qLogNEI
+selections whose explore/exploit character is internal to EI and varies from point to point.
+
+### Why it is built this way
+An earlier version of this project had an explicit explore/exploit portfolio: presets that split each
+round between pure variance‑reduction (exploration) and expected improvement (exploitation), tuned by
+an `explore_fraction`. That layer was removed during simplification, because qLogNEI with `X_pending`
+is *already* batch‑aware and *already* trades exploration against exploitation through the posterior —
+the extra machinery did not earn its keep. The honest description today is: **one acquisition
+function, EI‑based, that handles the whole tradeoff on its own, per point, automatically.**
 
 ---
 
