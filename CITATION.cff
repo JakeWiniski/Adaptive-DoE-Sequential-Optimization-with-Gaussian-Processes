@@ -1,0 +1,36 @@
+```yaml
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+type: software
+
+title: "Adaptive DoE: Sequential Experimental Optimization with Gaussian Processes"
+
+authors:
+  - family-names: "Winiski"
+    given-names: "Jake"
+    orcid: "https://orcid.org/0009-0003-7742-1284"
+
+version: "1.0.0"
+date-released: "2026-08-26"
+license: "MIT"
+
+doi: "10.5281/zenodo.22112432"
+
+abstract: >
+  An operator-facing workflow for sequential experimental optimization using
+  Gaussian-process surrogate modeling and Bayesian optimization. Designed for
+  practical biological and bioprocess R&D, the workflow supports mixed
+  experimental factors, blocking, controls, randomized execution, prospective
+  validation, uncertainty calibration, and confirmation rounds. The project
+  emphasizes accessibility and reproducibility rather than methodological novelty.
+
+keywords:
+  - design of experiments
+  - adaptive design of experiments
+  - Bayesian optimization
+  - Gaussian processes
+  - bioprocess development
+  - fermentation
+  - biodesign
+  - sequential experimentation
+```
