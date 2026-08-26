@@ -91,6 +91,14 @@ unknown and messy. It is a **complement to** classical DoE, not a replacement �
 adaptability it gives up the closed‑form guarantees and simple analysis of a pre‑specified design
 (see [Limitations](#limitations-what-you-give-up)).
 
+### Scope of the contribution
+
+This project does **not** propose a novel statistical method or a new form of design of experiments. Gaussian-process surrogate modeling, Bayesian optimization, expected-improvement acquisition, space-filling designs, blocking, randomization, and model-calibration diagnostics are established methods with mature statistical and software foundations.
+
+The contribution here is primarily one of **integration, accessibility, and practical implementation**. The workflow brings these methods together in a compact, operator-facing system designed around the realities of small biological R&D programs: limited experimental budgets, mixed continuous and categorical factors, achievable physical setpoints, batch effects, noisy biological responses, failed experimental units, and the need to make decisions between sequential rounds.
+
+The aim is therefore not to replace established DoE or Bayesian-optimization tools, but to make a rigorous adaptive experimentation workflow easier for practitioners to **run, inspect, interpret, and maintain** without requiring specialist statistical or software-engineering expertise. Particular emphasis is placed on prospective validation, transparent uncertainty, reproducible campaign records, and communicating when the model has — or has not — learned enough to deserve confidence.
+
 ### The practical use case
 The motivating domain is applied biology — mycelial cultures, fermentation, media/substrate
 optimization — where each run is slow and expensive, replicates are noisy, and you can only afford a
