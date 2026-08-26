@@ -621,3 +621,9 @@ pyproject.toml                  package + pinned dependencies
 
 The whole thing is intentionally small — five source modules, one operator notebook, five test
 files, and one validation script — so a bench team can read, run, and maintain it end to end.
+
+---
+
+## AI Use Disclosure
+
+This project was developed with assistance from generative AI and coding-agent tools. AI was used for coding, debugging, and development support; analytical design, validation, interpretation, and final decisions were performed by the author.
