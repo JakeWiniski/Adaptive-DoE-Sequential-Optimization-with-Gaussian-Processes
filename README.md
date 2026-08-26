@@ -1,4 +1,4 @@
-# Adaptive DoE
+# Adaptive DoE: Sequential Experimental Optimization with Gaussian Processes
 
 **Find a better recipe in fewer experiments — one small round at a time.**
 
@@ -13,6 +13,34 @@ plain‑language caption. The two calibration diagnostics (`rms_z` and the log�
 the deliberate exceptions, and each is explained on the page it appears on. If you can describe your
 experiment in real units and fill in a spreadsheet of results, you can run it.
 
+### Portfolio and provenance note
+
+This is an independently developed demonstration project built with synthetic data. It contains no
+proprietary employer data, code, process conditions, or confidential methodology. The project is
+intended to demonstrate an approach to sequential experimental design, model validation, uncertainty
+assessment, and operator-facing analytical workflow development.
+
+### Validation at a glance
+
+The committed validation notebook provides a reproducible performance check without requiring a
+reviewer to rerun the full optimization study.
+
+| Check | Recorded result |
+|---|---:|
+| Automated tests | **17 passed** |
+| Adaptive median final regret | **2.72 g/L** |
+| Matched space-filling median final regret | **5.44 g/L** |
+| Adaptive wins | **11 of 15 seeds** |
+| Paired one-sided Wilcoxon signed-rank test | **p = 0.00754** |
+| Null-response prospective RMSE / baseline SD | **1.26** |
+| Null-response apparent improvement vs. control | **4.3%** |
+
+![Paired final regret across 15 validation seeds](validation_final_regret.png)
+
+These are recorded results from the committed `notebooks/test_performance_report.ipynb`, using the
+synthetic fermentation and null-response simulators described below. They demonstrate performance
+on those validation systems, not guaranteed performance on a real experimental process.
+
 - **[What it is and why](#what-it-is-and-why)**
 - **[How it works (the method)](#how-it-works-the-method)**
 - **[The acquisition function (how recipes are chosen)](#the-acquisition-function-how-recipes-are-chosen)**
@@ -23,6 +51,7 @@ experiment in real units and fill in a spreadsheet of results, you can run it.
 - **[Reading the status page](#reading-the-status-page)**
 - **[Defining your experiment](#defining-your-experiment)**
 - **[Reproducibility and provenance](#reproducibility-and-provenance)**
+- **[Validation at a glance](#validation-at-a-glance)**
 - **[Validation](#validation)**
 - **[Limitations](#limitations-what-you-give-up)**
 - **[Repository layout](#repository-layout)**
