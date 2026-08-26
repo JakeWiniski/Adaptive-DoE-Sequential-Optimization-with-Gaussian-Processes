@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/1315327644.svg)](https://doi.org/10.5281/zenodo.22112431)
+
 # Adaptive DoE: Sequential Experimental Optimization with Gaussian Processes
 
 **Find a better recipe in fewer experiments — one small round at a time.**
